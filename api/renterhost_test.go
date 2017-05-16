@@ -1557,7 +1557,10 @@ func TestRemoteFileRepair(t *testing.T) {
 	}
 
 	// remove the local copy of the file
-	os.Remove(path)
+	err = os.Remove(path)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	// take down one of the hosts
 	stH1.server.Close()
@@ -1622,7 +1625,7 @@ func TestRemoteFileRepair(t *testing.T) {
 	// host using the download-to-upload strategy
 	err = retry(240, time.Second, func() error {
 		st.getAPI("/renter/files", &rf)
-		if len(rf.Files) >= 1 && rf.Files[0].Redundancy == 2 {
+		if len(rf.Files) >= 1 && rf.Files[0].Redundancy == 2 && rf.Files[0].Available {
 			return nil
 		}
 		return errors.New("file redundancy not incremented")

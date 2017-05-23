@@ -1,7 +1,6 @@
 package host
 
 import (
-	"encoding/json"
 	"os"
 	"path/filepath"
 
@@ -169,26 +168,6 @@ func (h *Host) load() error {
 			return err
 		}
 	} else if err != nil {
-		return err
-	}
-
-	// Get the contract count by observing all of the incomplete storage
-	// obligations in the database.
-	err = h.db.View(func(tx *bolt.Tx) error {
-		cursor := tx.Bucket(bucketStorageObligations).Cursor()
-		for k, v := cursor.First(); k != nil; k, v = cursor.Next() {
-			var so storageObligation
-			err := json.Unmarshal(v, &so)
-			if err != nil {
-				return err
-			}
-			if so.ObligationStatus == obligationUnresolved {
-				h.financialMetrics.ContractCount++
-			}
-		}
-		return nil
-	})
-	if err != nil {
 		return err
 	}
 
